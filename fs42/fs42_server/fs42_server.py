@@ -5,7 +5,7 @@ import uvicorn
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 
 # Add paths for module imports
 cwd = os.getcwd()
@@ -45,6 +45,11 @@ async def root():
 async def remote():
     return FileResponse("fs42/fs42_server/static/remote.html")
 
+@fapi.get("/player")
+async def webplayer():
+    # The player is served as a static bundle so its relative asset paths resolve.
+    return RedirectResponse("/webplayer/")
+
 @fapi.get('/favicon.ico', include_in_schema=False)
 async def favicon():
     return FileResponse("fs42/fs42_server/static/favicon.ico")
@@ -69,6 +74,8 @@ def run_with_shutdown_queue(shutdown_queue, command_queue):
     fapi.state.player_command_queue = command_queue
 
     fapi.mount("/static", StaticFiles(directory="fs42/fs42_server/static", html="true"), name="static")
+    if os.path.isdir("webplayer"):
+        fapi.mount("/webplayer", StaticFiles(directory="webplayer", html="true"), name="webplayer")
     os.makedirs("runtime/guide_videos", exist_ok=True)
     fapi.mount("/guide_videos", StaticFiles(directory="runtime/guide_videos"), name="guide_videos")
     conf = StationManager().server_conf
@@ -86,6 +93,8 @@ def mount_fs42_api():
     
     fapi.state.player_command_queue = None
     fapi.mount("/static", StaticFiles(directory="fs42/fs42_server/static", html="true"), name="static")
+    if os.path.isdir("webplayer"):
+        fapi.mount("/webplayer", StaticFiles(directory="webplayer", html="true"), name="webplayer")
     os.makedirs("runtime/guide_videos", exist_ok=True)
     fapi.mount("/guide_videos", StaticFiles(directory="runtime/guide_videos"), name="guide_videos")
     conf = StationManager().server_conf
