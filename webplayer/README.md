@@ -70,16 +70,35 @@ The browser only plays files reachable over HTTP (not raw `file://` paths), and
 only web-friendly formats — **MP4 (H.264/AAC)** and **WebM**. Other formats
 (MKV, AVI, etc.) need transcoding first.
 
-When the FS42 server is running it exposes a media folder at `/media`. Drop your
-videos in `media/` (created automatically; override the path with
-`"media_dir"` in `server_conf`) and add a channel pointing at them:
+When the FS42 server is running it exposes local video over HTTP via two mounts:
+
+| Mount      | Folder (configurable)        | Reachable from        |
+| ---------- | ---------------------------- | --------------------- |
+| `/media`   | `media/` (`media_dir`)       | **Anywhere** the server is reachable |
+| `/catalog` | `catalog/` (`catalog_dir`)   | **LAN only** (loopback / private / link-local clients) |
+
+Use `/media` for content you want available anywhere — drop files in `media/`:
 
 ```json
 { "channel_number": 3, "network_name": "My Tape",
   "url": "/media/show.mp4", "type": "mp4" }
 ```
 
-Without the FS42 server, serve the folder with any static host
+Use `/catalog` to reach your existing FS42 content without copying it. Its URL
+mirrors the `content_dir` paths in your station configs (e.g.
+`catalog/nbc_catalog/show.mp4` → `/catalog/nbc_catalog/show.mp4`):
+
+```json
+{ "channel_number": 4, "network_name": "NBC Tape",
+  "url": "/catalog/nbc_catalog/show.mp4", "type": "mp4" }
+```
+
+`/catalog` returns **403** for non-LAN clients, since it exposes the raw content
+tree (including catalog index files). If you front the server with a reverse
+proxy, the LAN check sees the proxy's address — restrict `/catalog` at the proxy
+in that setup.
+
+Without the FS42 server, serve any folder with a static host
 (`python3 -m http.server`) and use that URL instead.
 
 ## Notes / limitations
