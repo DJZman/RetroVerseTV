@@ -64,6 +64,24 @@ channel mirrors the FS42 stream schema:
 - In-browser edits are stored per-device in `localStorage` and take precedence
   over `channels.json`. Use **Reset to defaults** to clear them.
 
+## Playing local video files
+
+The browser only plays files reachable over HTTP (not raw `file://` paths), and
+only web-friendly formats — **MP4 (H.264/AAC)** and **WebM**. Other formats
+(MKV, AVI, etc.) need transcoding first.
+
+When the FS42 server is running it exposes a media folder at `/media`. Drop your
+videos in `media/` (created automatically; override the path with
+`"media_dir"` in `server_conf`) and add a channel pointing at them:
+
+```json
+{ "channel_number": 3, "network_name": "My Tape",
+  "url": "/media/show.mp4", "type": "mp4" }
+```
+
+Without the FS42 server, serve the folder with any static host
+(`python3 -m http.server`) and use that URL instead.
+
 ## Notes / limitations
 
 - Streams must be reachable from the **viewer's** browser and (for non-YouTube

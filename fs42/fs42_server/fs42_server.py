@@ -79,6 +79,11 @@ def run_with_shutdown_queue(shutdown_queue, command_queue):
     os.makedirs("runtime/guide_videos", exist_ok=True)
     fapi.mount("/guide_videos", StaticFiles(directory="runtime/guide_videos"), name="guide_videos")
     conf = StationManager().server_conf
+    # Serve a folder of local video files over HTTP so the web player can play
+    # them. Defaults to "media/"; override with server_conf["media_dir"].
+    media_dir = conf.get("media_dir", "media")
+    os.makedirs(media_dir, exist_ok=True)
+    fapi.mount("/media", StaticFiles(directory=media_dir), name="media")
     uvicorn.run(fapi, host=conf["server_host"], port=conf["server_port"])
 
 
@@ -98,6 +103,11 @@ def mount_fs42_api():
     os.makedirs("runtime/guide_videos", exist_ok=True)
     fapi.mount("/guide_videos", StaticFiles(directory="runtime/guide_videos"), name="guide_videos")
     conf = StationManager().server_conf
+    # Serve a folder of local video files over HTTP so the web player can play
+    # them. Defaults to "media/"; override with server_conf["media_dir"].
+    media_dir = conf.get("media_dir", "media")
+    os.makedirs(media_dir, exist_ok=True)
+    fapi.mount("/media", StaticFiles(directory=media_dir), name="media")
     uvicorn.run(fapi, host=conf["server_host"], port=conf["server_port"])
 
 
