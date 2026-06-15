@@ -51,22 +51,22 @@ docker-up:
 docker-down:
 	$(COMPOSE_ENV) docker compose -f $(COMPOSE_FILE) down
 
-station_42:
+rabbitears_station:
 ifeq ($(RUN_MODE),docker)
 	$(COMPOSE_ENV) docker compose -f $(COMPOSE_FILE) up -d
-	docker exec -it fieldstation42 python3 /app/station_42.py $(ARGS)
+	docker exec -it rabbitears python3 /app/rabbitears_station.py $(ARGS)
 	$(COMPOSE_ENV) docker compose -f $(COMPOSE_FILE) down
 else
-	@echo "Running station_42 locally..."
-	python3 station_42.py $(ARGS)
+	@echo "Running rabbitears_station locally..."
+	python3 rabbitears_station.py $(ARGS)
 endif
 
-field_player:
+rabbitears_player:
 ifeq ($(RUN_MODE),docker)
 	$(COMPOSE_ENV) docker compose -f $(COMPOSE_FILE) up -d
-	docker exec -it fieldstation42 python3 /app/field_player.py $(ARGS)
+	docker exec -it rabbitears python3 /app/rabbitears_player.py $(ARGS)
 	$(COMPOSE_ENV) docker compose -f $(COMPOSE_FILE) down
 else
-	@echo "Running field_player locally..."
-	python3 field_player.py $(ARGS)
+	@echo "Running rabbitears_player locally..."
+	python3 rabbitears_player.py $(ARGS)
 endif

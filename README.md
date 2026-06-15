@@ -1,6 +1,6 @@
-# FieldStation42
+# RabbitEars TV
 
-FieldStation42 turns your Linux computer or Raspberry Pi into a broadcast and cable TV simulator. Instead of picking something to watch, you flip channels. Scheduled programming plays on its own timeline, with commercials, station bumps, and all the in-between stuff that made old-school TV feel alive. Learn more at [fieldstation42.com](https://fieldstation42.com).
+RabbitEars TV turns your Linux computer or Raspberry Pi into a broadcast and cable TV simulator. Instead of picking something to watch, you flip channels. Scheduled programming plays on its own timeline, with commercials, station bumps, and all the in-between stuff that made old-school TV feel alive. Learn more at [rabbitears.com](https://fieldstation42.com).
 
 ![A cable box next to a TV](docs/cable_cover_3.png?raw=true)
 ## What It Does
@@ -19,7 +19,7 @@ FieldStation42 turns your Linux computer or Raspberry Pi into a broadcast and ca
 
 Full documentation, installation guide, and channel configuration walkthroughs are at:
 
-**[fieldstation42.com](https://fieldstation42.com)**
+**[rabbitears.com](https://fieldstation42.com)**
 
 
 ## Quick Start
@@ -30,7 +30,7 @@ sudo apt-get install mpv python3 python3-pip python3-venv
 
 # Clone the repo
 git clone https://github.com/shane-mason/FieldStation42
-cd FieldStation42
+cd RabbitEars TV
 
 # Run the installer
 bash install.sh
@@ -39,7 +39,7 @@ bash install.sh
 source env/bin/activate
 
 # Start the web console
-python3 station_42.py
+python3 rabbitears_station.py
 ```
 
 Then open a browser and go to `http://localhost:4242` to configure your first channel.
@@ -56,7 +56,7 @@ For the full step-by-step walkthrough, see the [Getting Started guide](https://f
 
 ## Support the Project
 
-If you're getting value from FieldStation42, consider supporting it on [Patreon](https://www.patreon.com/cw/FieldStation42). It helps keep the project active and the documentation current.
+If you're getting value from RabbitEars TV, consider supporting it on [Patreon](https://www.patreon.com/cw/FieldStation42). It helps keep the project active and the documentation current.
 
 ## Contributing
 

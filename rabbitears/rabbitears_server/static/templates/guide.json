@@ -1,0 +1,21 @@
+{
+  "station_conf": {
+    "network_name": "New Guide Channel",
+    "channel_number": 0,
+    "network_type": "guide",
+    "messages": [
+      "RabbitEars\nIt's Up To You!",
+      "RabbitEars TV\nGroovy, right?",
+      "RabbitEars\nRetro cable goodness.",
+      "RabbitEars TV\nTimeless TV.",
+      "RabbitEars TV\nMountain fresh."
+    ],
+    "images": [
+      "runtime/logo_images/gold42.png",
+      "runtime/logo_images/groove42.png", 
+      "runtime/logo_images/city42.png",
+      "runtime/logo_images/timeless42.png",
+      "runtime/logo_images/mountains42.png"
+    ]
+  }
+}

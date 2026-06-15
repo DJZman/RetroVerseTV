@@ -1,7 +1,7 @@
-# RetroVerseTV — Web Player
+# RabbitEars TV — Web Player
 
 A self-contained, "access anywhere" multi-stream player with the classic
-RetroVerseTV remote UI. Channels are plain stream URLs (HLS `.m3u8`, MP4/WebM,
+RabbitEars TV remote UI. Channels are plain stream URLs (HLS `.m3u8`, MP4/WebM,
 or YouTube) that play **directly in the browser** — no transcoding backend
 required — so you can host the `webplayer/` folder anywhere (or even open it
 from disk) and flip channels from any device.
@@ -11,7 +11,7 @@ from disk) and flip channels from any device.
 ## Features
 
 - **Retro TV remote** — seven-segment channel readout, Channel Up/Down, and a
-  numeric keypad, carried over from the original FieldStation42 remote.
+  numeric keypad, carried over from the original RabbitEars TV remote.
 - **In-browser playback** — HLS via [hls.js](https://github.com/video-dev/hls.js)
   (native HLS on Safari/iOS), progressive MP4/WebM, and YouTube embeds.
 - **Channel editor** — add/remove/rename streams in the browser; saved to
@@ -34,7 +34,7 @@ python3 -m http.server 8080
 Or open `webplayer/index.html` directly — it falls back to a few built-in demo
 channels when `channels.json` can't be fetched (e.g. over `file://`).
 
-**Through the FieldStation42 server:** when the FS42 web server is running, the
+**Through the RabbitEars TV server:** when the RabbitEars web server is running, the
 player is mounted automatically at:
 
 ```
@@ -44,7 +44,7 @@ http://<host>:<port>/player        (redirects to /webplayer/)
 ## Configuring channels
 
 Edit `channels.json`, or click **☰ Channels** in the player to edit live. Each
-channel mirrors the FS42 stream schema:
+channel mirrors the RabbitEars stream schema:
 
 ```json
 {
@@ -70,7 +70,7 @@ The browser only plays files reachable over HTTP (not raw `file://` paths), and
 only web-friendly formats — **MP4 (H.264/AAC)** and **WebM**. Other formats
 (MKV, AVI, etc.) need transcoding first.
 
-When the FS42 server is running it exposes local video over HTTP via two mounts:
+When the RabbitEars server is running it exposes local video over HTTP via two mounts:
 
 | Mount      | Folder (configurable)        | Reachable from        |
 | ---------- | ---------------------------- | --------------------- |
@@ -84,7 +84,7 @@ Use `/media` for content you want available anywhere — drop files in `media/`:
   "url": "/media/show.mp4", "type": "mp4" }
 ```
 
-Use `/catalog` to reach your existing FS42 content without copying it. Its URL
+Use `/catalog` to reach your existing RabbitEars content without copying it. Its URL
 mirrors the `content_dir` paths in your station configs (e.g.
 `catalog/nbc_catalog/show.mp4` → `/catalog/nbc_catalog/show.mp4`):
 
@@ -98,7 +98,7 @@ tree (including catalog index files). If you front the server with a reverse
 proxy, the LAN check sees the proxy's address — restrict `/catalog` at the proxy
 in that setup.
 
-Without the FS42 server, serve any folder with a static host
+Without the RabbitEars server, serve any folder with a static host
 (`python3 -m http.server`) and use that URL instead.
 
 ## Notes / limitations

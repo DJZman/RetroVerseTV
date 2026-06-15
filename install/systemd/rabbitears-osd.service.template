@@ -1,0 +1,19 @@
+[Unit]
+Description=RabbitEars TV On-Screen Display
+After=graphical-session.target rabbitears.service
+Requires=graphical-session.target
+PartOf=rabbitears.service
+
+[Service]
+Type=simple
+WorkingDirectory=__INSTALL_DIR__
+Environment="DISPLAY=:0"
+ExecStartPre=/bin/sleep 10
+ExecStart=__INSTALL_DIR__/env/bin/python3 rabbitears/osd/main.py
+Restart=always
+RestartSec=5
+StandardOutput=null
+StandardError=null
+
+[Install]
+WantedBy=default.target

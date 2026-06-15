@@ -1,6 +1,6 @@
 from datetime import datetime
-from fs42.timings import MONTHS
-from fs42.schedule_hint import MonthHint, QuarterHint, RangeHint
+from rabbitears.timings import MONTHS
+from rabbitears.schedule_hint import MonthHint, QuarterHint, RangeHint
 import pytest
 
 class TestMonthHint:

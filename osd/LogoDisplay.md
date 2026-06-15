@@ -28,7 +28,7 @@ Stores the default and global settings related to Logo Display including:
         "y_margin": 0.05,
         "display_time": 5.0,
         "always_show": false,
-        "default_logo": "fs42/osd/FS42.png",
+        "default_logo": "rabbitears/osd/RabbitEars.png",
         "default_logo_alpha": 1.0,
         "default_show_logo": true,
         "default_logo_permanent": false

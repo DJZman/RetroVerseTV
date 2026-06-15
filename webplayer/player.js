@@ -1,4 +1,4 @@
-/* RetroVerseTV — Web Player
+/* RabbitEars TV — Web Player
  *
  * A self-contained, "access anywhere" multi-stream player. Channels are plain
  * stream URLs (HLS / MP4 / WebM / YouTube) played directly in the browser, so
@@ -9,8 +9,8 @@
 (() => {
   "use strict";
 
-  const STORE_KEY = "rvtv_channels";
-  const LAST_KEY = "rvtv_last_channel";
+  const STORE_KEY = "rabbitears_channels";
+  const LAST_KEY = "rabbitears_last_channel";
 
   // Embedded fallback so the app still works when opened from file:// (where
   // fetching channels.json may be blocked).

@@ -16,13 +16,13 @@ ERROR="${RED}[✗]${NC}"
 
 echo ""
 echo -e "${CYAN}════════════════════════════════════════════════${NC}"
-echo -e "${BLUE}Installing FieldStation42 systemd user services${NC}"
+echo -e "${BLUE}Installing RabbitEars TV systemd user services${NC}"
 echo -e "${CYAN}════════════════════════════════════════════════${NC}"
 echo ""
 
 
 INSTALL_DIR=$(cd "$(dirname "$0")/.." && pwd)
-echo -e "${INFO} FieldStation42 installation directory: ${GREEN}$INSTALL_DIR${NC}"
+echo -e "${INFO} RabbitEars TV installation directory: ${GREEN}$INSTALL_DIR${NC}"
 
 SYSTEMD_USER_DIR="$HOME/.config/systemd/user"
 if [ ! -d "$SYSTEMD_USER_DIR" ]; then
@@ -62,33 +62,33 @@ SERVICES_TO_ENABLE=()
 
 # Field Player
 echo -e "${BLUE}Field Player${NC} - Main content playback service (core functionality)"
-read -p "Enable fs42.service? (Y/n): " enable_fp
+read -p "Enable rabbitears.service? (Y/n): " enable_fp
 if [[ ! "$enable_fp" =~ ^[Nn]$ ]]; then
-    SERVICES_TO_ENABLE+=("fs42.service")
+    SERVICES_TO_ENABLE+=("rabbitears.service")
 fi
 
 # Cable Box
 echo ""
 echo -e "${BLUE}Cable Box${NC} - Cable box interface"
-read -p "Enable fs42-cable-box.service? (y/N): " enable_cb
+read -p "Enable rabbitears-cable-box.service? (y/N): " enable_cb
 if [[ "$enable_cb" =~ ^[Yy]$ ]]; then
-    SERVICES_TO_ENABLE+=("fs42-cable-box.service")
+    SERVICES_TO_ENABLE+=("rabbitears-cable-box.service")
 fi
 
 # Remote Controller
 echo ""
 echo -e "${BLUE}Remote Controller${NC} - Remote controller interface"
-read -p "Enable fs42-remote-controller.service? (y/N): " enable_rc
+read -p "Enable rabbitears-remote-controller.service? (y/N): " enable_rc
 if [[ "$enable_rc" =~ ^[Yy]$ ]]; then
-    SERVICES_TO_ENABLE+=("fs42-remote-controller.service")
+    SERVICES_TO_ENABLE+=("rabbitears-remote-controller.service")
 fi
 
 # OSD
 echo ""
 echo -e "${BLUE}On-Screen Display${NC} - Visual overlay (starts 30s after login)"
-read -p "Enable fs42-osd.service? (y/N): " enable_osd
+read -p "Enable rabbitears-osd.service? (y/N): " enable_osd
 if [[ "$enable_osd" =~ ^[Yy]$ ]]; then
-    SERVICES_TO_ENABLE+=("fs42-osd.service")
+    SERVICES_TO_ENABLE+=("rabbitears-osd.service")
 fi
 
 # Enable selected services
@@ -121,7 +121,7 @@ echo -e "${INFO} Enabled services will start automatically on next login."
 echo -e "${INFO} To start them now, run: ${CYAN}systemctl --user start <service-name>${NC}"
 echo ""
 echo -e "${INFO} Useful commands:"
-echo -e "  ${CYAN}systemctl --user status fs42*${NC}        - Check status of enabled services"
+echo -e "  ${CYAN}systemctl --user status rabbitears*${NC}        - Check status of enabled services"
 echo -e "  ${CYAN}systemctl --user stop <service>${NC}      - Stop a specific service"
 echo -e "  ${CYAN}systemctl --user restart <service>${NC}   - Restart a specific service"
 echo -e "  ${CYAN}journalctl --user -u <service> -f${NC}    - View logs for a service"

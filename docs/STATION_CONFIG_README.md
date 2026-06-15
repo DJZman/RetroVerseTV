@@ -1,6 +1,6 @@
-# FieldStation42 Station Configuration Reference
+# RabbitEars TV Station Configuration Reference
 
-This document describes the configuration format for FieldStation42 station/channel configurations.
+This document describes the configuration format for RabbitEars TV station/channel configurations.
 
 ## Table of Contents
 - [Overview](#overview)
@@ -572,7 +572,7 @@ python3 validate_configs.py
 
 ## Notes
 
-- **File paths** in configuration are relative to the FieldStation42 root directory
+- **File paths** in configuration are relative to the RabbitEars TV root directory
 - **Hour keys** in day schedules are strings (`"0"` through `"23"`)
 - **Off-air hours** are simply omitted from the schedule
 - **Template and override references** are case-sensitive
@@ -583,6 +583,6 @@ python3 validate_configs.py
 
 - `confs/examples/` - Example configuration files
 - `station_config_schema.json` - JSON Schema for validation
-- `fs42/config_processor.py` - Configuration preprocessing logic
-- `fs42/slot_reader.py` - Schedule slot reading logic
-- `fs42/station_manager.py` - Station loading and initialization
+- `rabbitears/config_processor.py` - Configuration preprocessing logic
+- `rabbitears/slot_reader.py` - Schedule slot reading logic
+- `rabbitears/station_manager.py` - Station loading and initialization

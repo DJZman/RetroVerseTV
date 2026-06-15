@@ -1,5 +1,5 @@
 # import pytest
-# from fs42.series import SeriesIndex
+# from rabbitears.series import SeriesIndex
 
 # class TestSeriesIndex:
 

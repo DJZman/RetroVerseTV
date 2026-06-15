@@ -28,7 +28,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 # ---------------------------------------------------------------------------
-# Stub out heavy / native deps BEFORE any fs42 import so the module-level
+# Stub out heavy / native deps BEFORE any rabbitears import so the module-level
 # guard in media_processor.py ("ffmpeg-python not found") does not abort.
 # MagicMock satisfies `hasattr(ffmpeg, 'probe')` automatically.
 # ---------------------------------------------------------------------------
@@ -41,10 +41,10 @@ sys.modules.setdefault("moviepy", _moviepy_stub)
 sys.modules.setdefault("moviepy.editor", _moviepy_stub)
 
 # ---------------------------------------------------------------------------
-# Safe to import fs42 now
+# Safe to import rabbitears now
 # ---------------------------------------------------------------------------
-from fs42.catalog_entry import CatalogEntry, MatchingContentNotFound  # noqa: E402
-from fs42.liquid_blocks import LiquidBlock                             # noqa: E402
+from rabbitears.catalog_entry import CatalogEntry, MatchingContentNotFound  # noqa: E402
+from rabbitears.liquid_blocks import LiquidBlock                             # noqa: E402
 
 
 # ---------------------------------------------------------------------------
@@ -85,7 +85,7 @@ def _block(content, start, end):
 
 def _catalog(entries, network_name="Comedy1"):
     """Return a ShowCatalog with a hand-built clip_index, bypassing the DB."""
-    from fs42.catalog import ShowCatalog
+    from rabbitears.catalog import ShowCatalog
     conf = {
         "network_name": network_name,
         "network_type": "standard",
@@ -309,7 +309,7 @@ class TestRegisterExclusion(unittest.TestCase):
 
     @staticmethod
     def _register():
-        from fs42.liquid_schedule import LiquidSchedule
+        from rabbitears.liquid_schedule import LiquidSchedule
         return LiquidSchedule._register_exclusion
 
     def test_adds_new_key(self):
@@ -407,11 +407,11 @@ class TestBuildExclusionIndex(unittest.TestCase):
             "schedule_increment": 30,
             "monday": {"0": {"tags": "comedy"}},
         }
-        with patch("fs42.liquid_schedule.StationManager"), \
-             patch("fs42.liquid_schedule.LiquidIO"), \
-             patch("fs42.liquid_schedule.LiquidAPI"), \
-             patch("fs42.catalog.CatalogAPI"):
-            from fs42.liquid_schedule import LiquidSchedule
+        with patch("rabbitears.liquid_schedule.StationManager"), \
+             patch("rabbitears.liquid_schedule.LiquidIO"), \
+             patch("rabbitears.liquid_schedule.LiquidAPI"), \
+             patch("rabbitears.catalog.CatalogAPI"):
+            from rabbitears.liquid_schedule import LiquidSchedule
             sched = LiquidSchedule.__new__(LiquidSchedule)
             sched.conf = conf
             import logging
@@ -433,8 +433,8 @@ class TestBuildExclusionIndex(unittest.TestCase):
         stations = [
             {"network_name": "Comedy1", "network_type": "standard", "content_dir": CONTENT_DIR},
         ]
-        with patch("fs42.liquid_schedule.StationManager") as MockSM, \
-             patch("fs42.liquid_schedule.LiquidIO") as MockIO:
+        with patch("rabbitears.liquid_schedule.StationManager") as MockSM, \
+             patch("rabbitears.liquid_schedule.LiquidIO") as MockIO:
             MockSM.return_value.stations = stations
 
             result = sched._build_exclusion_index(T20, T22)
@@ -453,8 +453,8 @@ class TestBuildExclusionIndex(unittest.TestCase):
         content.realpath = rp
         mock_block = _block(content, T20, T22)
 
-        with patch("fs42.liquid_schedule.StationManager") as MockSM, \
-             patch("fs42.liquid_schedule.LiquidIO") as MockIO:
+        with patch("rabbitears.liquid_schedule.StationManager") as MockSM, \
+             patch("rabbitears.liquid_schedule.LiquidIO") as MockIO:
             MockSM.return_value.stations = stations
             MockIO.return_value.query_liquid_blocks.return_value = [mock_block]
 
@@ -471,8 +471,8 @@ class TestBuildExclusionIndex(unittest.TestCase):
             self._sibling_conf("Comedy3"),
             self._sibling_conf("Comedy4"),
         ]
-        with patch("fs42.liquid_schedule.StationManager") as MockSM, \
-             patch("fs42.liquid_schedule.LiquidIO") as MockIO:
+        with patch("rabbitears.liquid_schedule.StationManager") as MockSM, \
+             patch("rabbitears.liquid_schedule.LiquidIO") as MockIO:
             MockSM.return_value.stations = stations
             MockIO.return_value.query_liquid_blocks.return_value = []
 
@@ -487,8 +487,8 @@ class TestBuildExclusionIndex(unittest.TestCase):
             {"network_name": "Comedy1", "network_type": "standard", "content_dir": CONTENT_DIR},
             self._sibling_conf("Sports1", content_dir="/other/content"),
         ]
-        with patch("fs42.liquid_schedule.StationManager") as MockSM, \
-             patch("fs42.liquid_schedule.LiquidIO") as MockIO:
+        with patch("rabbitears.liquid_schedule.StationManager") as MockSM, \
+             patch("rabbitears.liquid_schedule.LiquidIO") as MockIO:
             MockSM.return_value.stations = stations
 
             result = sched._build_exclusion_index(T20, T22)
@@ -513,8 +513,8 @@ class TestBuildExclusionIndex(unittest.TestCase):
              "content_dir": CONTENT_DIR, "monday": {"0": {"tags": "comedy"}}},
             drama_conf,
         ]
-        with patch("fs42.liquid_schedule.StationManager") as MockSM, \
-             patch("fs42.liquid_schedule.LiquidIO") as MockIO:
+        with patch("rabbitears.liquid_schedule.StationManager") as MockSM, \
+             patch("rabbitears.liquid_schedule.LiquidIO") as MockIO:
             MockSM.return_value.stations = stations
 
             result = sched._build_exclusion_index(T20, T22)
@@ -542,8 +542,8 @@ class TestBuildExclusionIndex(unittest.TestCase):
         content.realpath = rp
         mock_block = _block(content, T20, T22)
 
-        with patch("fs42.liquid_schedule.StationManager") as MockSM, \
-             patch("fs42.liquid_schedule.LiquidIO") as MockIO:
+        with patch("rabbitears.liquid_schedule.StationManager") as MockSM, \
+             patch("rabbitears.liquid_schedule.LiquidIO") as MockIO:
             MockSM.return_value.stations = stations
             MockIO.return_value.query_liquid_blocks.return_value = [mock_block]
 
@@ -560,8 +560,8 @@ class TestBuildExclusionIndex(unittest.TestCase):
         ]
         list_block = _block([MagicMock(), MagicMock()], T20, T22)  # clip show
 
-        with patch("fs42.liquid_schedule.StationManager") as MockSM, \
-             patch("fs42.liquid_schedule.LiquidIO") as MockIO:
+        with patch("rabbitears.liquid_schedule.StationManager") as MockSM, \
+             patch("rabbitears.liquid_schedule.LiquidIO") as MockIO:
             MockSM.return_value.stations = stations
             MockIO.return_value.query_liquid_blocks.return_value = [list_block]
 
@@ -575,7 +575,7 @@ class TestBuildExclusionIndex(unittest.TestCase):
         (TypeError, AttributeError etc.) are NOT caught and will still propagate."""
         sched = self._make_schedule()
 
-        with patch("fs42.liquid_schedule.StationManager") as MockSM:
+        with patch("rabbitears.liquid_schedule.StationManager") as MockSM:
             import sqlite3
             MockSM.side_effect = sqlite3.OperationalError("unable to open database")
             result = sched._build_exclusion_index(T20, T22)
@@ -591,8 +591,8 @@ class TestBuildExclusionIndex(unittest.TestCase):
             {"network_name": "Comedy1", "network_type": "standard", "content_dir": CONTENT_DIR},
             self._sibling_conf("Comedy2"),
         ]
-        with patch("fs42.liquid_schedule.StationManager") as MockSM, \
-             patch("fs42.liquid_schedule.LiquidIO") as MockIO:
+        with patch("rabbitears.liquid_schedule.StationManager") as MockSM, \
+             patch("rabbitears.liquid_schedule.LiquidIO") as MockIO:
             MockSM.return_value.stations = stations
             MockIO.return_value.query_liquid_blocks.return_value = []
 
@@ -617,11 +617,11 @@ class TestFillGracefulDegradation(unittest.TestCase):
 
     def _make_sched(self):
         """LiquidSchedule with a mocked catalog, bypassing DB and file I/O."""
-        with patch("fs42.liquid_schedule.StationManager"), \
-             patch("fs42.liquid_schedule.LiquidIO"), \
-             patch("fs42.liquid_schedule.LiquidAPI"), \
-             patch("fs42.catalog.CatalogAPI"):
-            from fs42.liquid_schedule import LiquidSchedule
+        with patch("rabbitears.liquid_schedule.StationManager"), \
+             patch("rabbitears.liquid_schedule.LiquidIO"), \
+             patch("rabbitears.liquid_schedule.LiquidAPI"), \
+             patch("rabbitears.catalog.CatalogAPI"):
+            from rabbitears.liquid_schedule import LiquidSchedule
             sched = LiquidSchedule.__new__(LiquidSchedule)
             sched.conf = {
                 "network_name": "Comedy1",
@@ -647,8 +647,8 @@ class TestFillGracefulDegradation(unittest.TestCase):
           - log a WARNING so operators know an overlap was unavoidable
           - call find_candidate exactly twice
         """
-        from fs42.catalog_entry import MatchingContentNotFound
-        from fs42.liquid_schedule import LiquidSchedule
+        from rabbitears.catalog_entry import MatchingContentNotFound
+        from rabbitears.liquid_schedule import LiquidSchedule
 
         sched = self._make_sched()
         candidate = MagicMock()
@@ -664,7 +664,7 @@ class TestFillGracefulDegradation(unittest.TestCase):
 
         exclusion_index = {os.path.realpath(MOVIE_A): [(T20, T22)]}
 
-        with patch("fs42.liquid_schedule.PathQuery") as MockPQ, \
+        with patch("rabbitears.liquid_schedule.PathQuery") as MockPQ, \
              patch.object(sched, "_break_info", return_value=(
                  {"start_bump": None, "end_bump": None, "bump_dir": None,
                   "commercial_dir": None, "break_strategy": None, "increment": None},
@@ -693,14 +693,14 @@ class TestFillGracefulDegradation(unittest.TestCase):
         genuine content shortage (not an exclusion side-effect).  The exception
         must propagate so the caller can decide how to handle it.
         """
-        from fs42.catalog_entry import MatchingContentNotFound
+        from rabbitears.catalog_entry import MatchingContentNotFound
         sched = self._make_sched()
         # Both calls fail — no content exists at all
         sched.catalog.find_candidate.side_effect = MatchingContentNotFound("no content")
 
         exclusion_index = {os.path.realpath(MOVIE_A): [(T20, T22)]}
 
-        with patch("fs42.liquid_schedule.PathQuery"):
+        with patch("rabbitears.liquid_schedule.PathQuery"):
             with self.assertRaises(MatchingContentNotFound):
                 sched._fill(self._slot(), "comedy", T20,
                             exclusion_index=exclusion_index)
@@ -710,11 +710,11 @@ class TestFillGracefulDegradation(unittest.TestCase):
         When no exclusion_index is active and content is not found, the exception
         propagates on the first call without any retry — there is nothing to retry.
         """
-        from fs42.catalog_entry import MatchingContentNotFound
+        from rabbitears.catalog_entry import MatchingContentNotFound
         sched = self._make_sched()
         sched.catalog.find_candidate.side_effect = MatchingContentNotFound("no content")
 
-        with patch("fs42.liquid_schedule.PathQuery"):
+        with patch("rabbitears.liquid_schedule.PathQuery"):
             with self.assertRaises(MatchingContentNotFound):
                 sched._fill(self._slot(), "comedy", T20)  # no exclusion_index
 

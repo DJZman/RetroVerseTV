@@ -4,11 +4,11 @@
     "channel_number": 3,
     "content_dir" : "catalog/indie42_catalog/commercial/December",
     "messages": [
-      "FS42\nIt's Up To You!",
-      "FieldStation42\nGroovy, right?",
-      "FS42\nRetro cable goodness.",
-      "FieldStation42\nTimeless TV.",
-      "FieldStation42\nMountain fresh."
+      "RabbitEars\nIt's Up To You!",
+      "RabbitEars TV\nGroovy, right?",
+      "RabbitEars\nRetro cable goodness.",
+      "RabbitEars TV\nTimeless TV.",
+      "RabbitEars TV\nMountain fresh."
     ],
     "images": [
       "runtime/logo_images/gold42.png",

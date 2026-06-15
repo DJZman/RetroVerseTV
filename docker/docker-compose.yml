@@ -1,9 +1,9 @@
 services:
-  fieldstation:
+  rabbitears:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    container_name: fieldstation42
+    container_name: rabbitears
     volumes:
       # Needed for the app - mounts so data persists
       - ${CATALOG_LOCATION}:/app/catalog
