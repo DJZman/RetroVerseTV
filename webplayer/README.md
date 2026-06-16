@@ -14,6 +14,8 @@ from disk) and flip channels from any device.
   numeric keypad, carried over from the original RabbitEars TV remote.
 - **In-browser playback** — HLS via [hls.js](https://github.com/video-dev/hls.js)
   (native HLS on Safari/iOS), progressive MP4/WebM, and YouTube embeds.
+- **Loop / folder channels** — point a channel at a folder or playlist and it
+  plays through everything, auto-advancing and looping (sequential or shuffle).
 - **Channel editor** — add/remove/rename streams in the browser; saved to
   `localStorage`, so each device keeps its own lineup.
 - **Retro touches** — TV-static channel-change effect, CRT scanlines, an
@@ -60,9 +62,44 @@ channel mirrors the RabbitEars stream schema:
 }
 ```
 
-- `type` may be `hls`, `mp4`, `youtube`, or `auto` (detected from the URL).
+- `type` may be `hls`, `mp4`, `youtube`, `folder`, or `auto` (detected from the
+  URL).
 - In-browser edits are stored per-device in `localStorage` and take precedence
   over `channels.json`. Use **Reset to defaults** to clear them.
+
+## Loop / folder channels
+
+A channel can play through a whole folder of videos instead of a single file —
+a simple "loop channel" that auto-advances to the next clip and loops at the
+end. (This is *not* the full FieldStation42 schedule: no commercials, bumps, or
+time-of-day programming — just continuous playback of the list.)
+
+Three ways to define one:
+
+```json
+{ "channel_number": 5, "network_name": "Cartoons",
+  "url": "/media/cartoons/", "type": "folder", "order": "shuffle" }
+```
+
+```json
+{ "channel_number": 6, "network_name": "Saturday AM",
+  "url": "/media/playlist.m3u", "type": "folder" }
+```
+
+```json
+{ "channel_number": 7, "network_name": "Shorts",
+  "playlist": ["/media/a.mp4", "/media/b.mp4", "/media/c.webm"] }
+```
+
+- **`folder`** points at either a **directory** or an **`.m3u` / `.json`**
+  playlist file. For a directory, the server must return a listing — Python's
+  `python3 -m http.server` does this automatically; the RabbitEars app server's
+  `/media` and `/catalog` mounts do **not** auto-list, so use an `.m3u`/`.json`
+  file or an inline `playlist` there.
+- **`order`** is `sequential` (default, natural-sorted by filename) or
+  `shuffle`.
+- Only browser-playable files are included (`.mp4`, `.m4v`, `.webm`, `.ogv`,
+  `.ogg`, `.mov`, `.m3u8`); the folder must be same-origin or CORS-enabled.
 
 ## Playing local video files
 

@@ -4,6 +4,10 @@
  * stream URLs (HLS / MP4 / WebM / YouTube) played directly in the browser, so
  * no transcoding backend is required. The retro TV remote (seven-seg display,
  * channel up/down, keypad) drives which stream is on screen.
+ *
+ * A channel can also be a "loop" channel: point it at a folder (directory
+ * autoindex), an .m3u / .json playlist, or an inline list of files, and it
+ * plays through them in order (or shuffled), auto-advancing and looping.
  */
 
 (() => {
@@ -11,6 +15,9 @@
 
   const STORE_KEY = "rabbitears_channels";
   const LAST_KEY = "rabbitears_last_channel";
+
+  // Files the browser can actually play (mkv/avi need transcoding first).
+  const VIDEO_EXT = /\.(mp4|m4v|webm|ogv|ogg|mov|m3u8)$/i;
 
   // Embedded fallback so the app still works when opened from file:// (where
   // fetching channels.json may be blocked).
@@ -23,20 +30,26 @@
       url: "https://www.youtube.com/watch?v=jfKfPfyJRdk", title: "lofi hip hop radio · live" },
   ];
 
-  // ---- DOM ----
+  // ---- DOM (cached lazily in cacheDom() so this file is also Node-requirable
+  // for unit-testing the pure parser) ----
   const el = (id) => document.getElementById(id);
-  const screen = el("screen");
-  const video = el("video");
-  const yt = el("yt");
-  const staticCanvas = el("static");
-  const osd = el("osd");
-  const osdChan = el("osd-chan");
-  const osdName = el("osd-name");
-  const sevenSeg = el("current-channel");
-  const networkName = el("network-name");
-  const titleEl = el("title");
-  const entryEl = el("entry");
-  const unmuteHint = el("unmute-hint");
+  let screen, video, yt, staticCanvas, osd, osdChan, osdName,
+      sevenSeg, networkName, titleEl, entryEl, unmuteHint;
+
+  function cacheDom() {
+    screen = el("screen");
+    video = el("video");
+    yt = el("yt");
+    staticCanvas = el("static");
+    osd = el("osd");
+    osdChan = el("osd-chan");
+    osdName = el("osd-name");
+    sevenSeg = el("current-channel");
+    networkName = el("network-name");
+    titleEl = el("title");
+    entryEl = el("entry");
+    unmuteHint = el("unmute-hint");
+  }
 
   // ---- State ----
   let channels = [];
@@ -47,28 +60,47 @@
   let osdTimer = null;
   let staticRAF = null;
   let staticStop = 0;
+  // Loop-channel state
+  let tuneToken = 0;     // bumped on every tune so stale async resolves are ignored
+  let playlist = null;   // array of media URLs when on a loop channel, else null
+  let playlistPos = 0;
+  let baseTitle = "";    // channel title shown alongside the current item name
 
   // ===================================================================
   // Channel data (load / persist)
   // ===================================================================
   function normalize(list) {
     return (list || [])
-      .map((c, i) => ({
-        channel_number: Number(c.channel_number ?? c.channel ?? i + 1),
-        network_name: c.network_name || c.name || `Channel ${i + 1}`,
-        url: (c.url || "").trim(),
-        type: c.type || detectType(c.url || ""),
-        title: c.title || "",
-      }))
-      .filter((c) => c.url)
+      .map((c, i) => {
+        const url = (c.url || "").trim();
+        const inlinePlaylist = Array.isArray(c.playlist) ? c.playlist.filter(Boolean) : null;
+        let type = c.type;
+        if (!type) type = inlinePlaylist ? "playlist" : detectType(url);
+        return {
+          channel_number: Number(c.channel_number ?? c.channel ?? i + 1),
+          network_name: c.network_name || c.name || `Channel ${i + 1}`,
+          url,
+          type,
+          title: c.title || "",
+          playlist: inlinePlaylist,
+          order: c.order === "shuffle" ? "shuffle" : "sequential",
+        };
+      })
+      .filter((c) => c.url || (c.playlist && c.playlist.length))
       .sort((a, b) => a.channel_number - b.channel_number);
   }
 
   function detectType(url) {
-    const u = url.toLowerCase();
+    const u = url.toLowerCase().split("?")[0];
     if (/youtube\.com|youtu\.be/.test(u)) return "youtube";
-    if (u.includes(".m3u8")) return "hls";
+    if (u.endsWith("/")) return "folder";       // directory autoindex
+    if (u.endsWith(".m3u")) return "folder";     // playlist file (.m3u8 is HLS, handled below)
+    if (u.endsWith(".m3u8")) return "hls";
     return "mp4";
+  }
+
+  function isLoopType(type) {
+    return type === "folder" || type === "playlist";
   }
 
   async function loadChannels() {
@@ -97,6 +129,77 @@
   }
 
   // ===================================================================
+  // Loop channel: resolve a folder / playlist into a list of media URLs
+  // ===================================================================
+
+  // Pure parser: turn a folder listing / playlist body into media URLs.
+  // Handles JSON arrays, .m3u playlists, and HTML directory autoindexes.
+  function parseListing(text, baseUrl) {
+    const out = [];
+    const body = (text || "").trim();
+    const absolutize = (href) => {
+      try { return new URL(href, baseUrl).href; } catch (_) { return null; }
+    };
+
+    if (body.startsWith("[") || body.startsWith("{")) {
+      // JSON: array of strings, or array of objects with .url, or { files: [...] }
+      try {
+        let data = JSON.parse(body);
+        if (!Array.isArray(data)) data = data.files || data.items || data.playlist || [];
+        for (const item of data) {
+          const href = typeof item === "string" ? item : (item && item.url);
+          if (href) out.push(absolutize(href));
+        }
+      } catch (_) { /* not valid JSON, fall through */ }
+    } else if (/^#EXTM3U/m.test(body) || (!/[<>]/.test(body) && /\n/.test(body))) {
+      // .m3u playlist (or a plain newline-separated URL list)
+      for (const raw of body.split(/\r?\n/)) {
+        const line = raw.trim();
+        if (!line || line.startsWith("#")) continue;
+        out.push(absolutize(line));
+      }
+    } else {
+      // HTML directory listing: pull href targets
+      const re = /href\s*=\s*["']([^"']+)["']/gi;
+      let m;
+      while ((m = re.exec(body)) !== null) out.push(absolutize(m[1]));
+    }
+
+    return out
+      .filter((u) => u && VIDEO_EXT.test(u.split("?")[0]))
+      .filter((u, i, a) => a.indexOf(u) === i); // de-dupe
+  }
+
+  function naturalSort(a, b) {
+    return a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" });
+  }
+
+  function shuffleInPlace(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  async function resolveItems(ch) {
+    let items;
+    if (ch.playlist && ch.playlist.length) {
+      const base = new URL(location.href);
+      items = ch.playlist
+        .map((u) => { try { return new URL(u, base).href; } catch (_) { return null; } })
+        .filter(Boolean);
+    } else {
+      const resp = await fetch(ch.url, { cache: "no-store" });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      items = parseListing(await resp.text(), resp.url || ch.url);
+    }
+    if (ch.order === "shuffle") shuffleInPlace(items);
+    else items.sort(naturalSort);
+    return items;
+  }
+
+  // ===================================================================
   // YouTube helpers
   // ===================================================================
   function youtubeId(url) {
@@ -117,10 +220,51 @@
     screen.classList.toggle("no-signal-on", on);
   }
 
-  function playChannel(index, { withStatic = true } = {}) {
+  // Play a single media URL (HLS via hls.js where needed, else native).
+  function playMedia(url, type) {
+    type = type || detectType(url);
+    screen.classList.remove("is-youtube");
+    showNoSignal(false);
+    teardownVideo();
+
+    if (type === "hls" && !video.canPlayType("application/vnd.apple.mpegurl")) {
+      if (window.Hls && window.Hls.isSupported()) {
+        hls = new window.Hls({ enableWorker: true, lowLatencyMode: true });
+        hls.loadSource(url);
+        hls.attachMedia(video);
+        hls.on(window.Hls.Events.MANIFEST_PARSED, () => safePlay());
+        hls.on(window.Hls.Events.ERROR, (_e, data) => {
+          if (data.fatal) showNoSignal(true);
+        });
+        return;
+      }
+      showNoSignal(true);
+      return;
+    }
+
+    // Native HLS (Safari/iOS) or progressive MP4/WebM
+    video.src = url;
+    video.addEventListener("error", () => showNoSignal(true), { once: true });
+    safePlay();
+  }
+
+  function itemName(url) {
+    try {
+      const path = new URL(url, location.href).pathname;
+      return decodeURIComponent(path.split("/").pop() || "");
+    } catch (_) { return ""; }
+  }
+
+  function setTitle(text) {
+    titleEl.textContent = text || "";
+  }
+
+  async function playChannel(index, { withStatic = true } = {}) {
     if (index < 0 || index >= channels.length) return;
     currentIndex = index;
     const ch = channels[index];
+    const token = ++tuneToken;
+    playlist = null;
 
     localStorage.setItem(LAST_KEY, String(ch.channel_number));
     updateRemote(ch);
@@ -135,7 +279,6 @@
       const id = youtubeId(ch.url);
       screen.classList.add("is-youtube");
       if (id) {
-        // mute=1 keeps autoplay allowed; user can unmute on YouTube's own UI
         yt.src = `https://www.youtube.com/embed/${id}?autoplay=1&mute=${video.muted ? 1 : 0}&playsinline=1&rel=0`;
       } else {
         showNoSignal(true);
@@ -143,28 +286,42 @@
       return;
     }
 
-    screen.classList.remove("is-youtube");
-
-    if (ch.type === "hls" && !video.canPlayType("application/vnd.apple.mpegurl")) {
-      // Use hls.js where native HLS is unavailable (Chrome, Firefox)
-      if (window.Hls && window.Hls.isSupported()) {
-        hls = new window.Hls({ enableWorker: true, lowLatencyMode: true });
-        hls.loadSource(ch.url);
-        hls.attachMedia(video);
-        hls.on(window.Hls.Events.MANIFEST_PARSED, () => safePlay());
-        hls.on(window.Hls.Events.ERROR, (_e, data) => {
-          if (data.fatal) showNoSignal(true);
-        });
-        return;
+    if (isLoopType(ch.type) || ch.playlist) {
+      baseTitle = ch.title || "";
+      try {
+        const items = await resolveItems(ch);
+        if (token !== tuneToken) return;          // user changed channel meanwhile
+        if (!items.length) { showNoSignal(true); setTitle("No playable files"); return; }
+        playlist = items;
+        playlistPos = 0;
+        playPlaylistItem();
+      } catch (_) {
+        if (token !== tuneToken) return;
+        showNoSignal(true);
+        setTitle("Folder unreachable");
       }
-      showNoSignal(true);
       return;
     }
 
-    // Native HLS (Safari/iOS) or progressive MP4/WebM
-    video.src = ch.url;
-    video.addEventListener("error", () => showNoSignal(true), { once: true });
-    safePlay();
+    // Single stream / file
+    baseTitle = "";
+    setTitle(ch.title || "");
+    playMedia(ch.url, ch.type);
+  }
+
+  function playPlaylistItem() {
+    if (!playlist || !playlist.length) return;
+    const url = playlist[playlistPos];
+    const name = itemName(url);
+    setTitle(baseTitle ? `${baseTitle} — ${name}` : name);
+    playMedia(url, detectType(url));
+  }
+
+  function onMediaEnded() {
+    if (!playlist || !playlist.length) return;   // single VOD just stops
+    playlistPos = (playlistPos + 1) % playlist.length;
+    runStatic(250);
+    playPlaylistItem();
   }
 
   function safePlay() {
@@ -197,9 +354,11 @@
     } else {
       // tuned to an empty channel
       currentIndex = -1;
+      tuneToken++;
+      playlist = null;
       sevenSeg.textContent = String(num).padStart(2, "0");
       networkName.textContent = "";
-      titleEl.textContent = "";
+      setTitle("");
       teardownVideo();
       yt.src = "about:blank";
       screen.classList.remove("is-youtube");
@@ -214,7 +373,7 @@
   function updateRemote(ch) {
     sevenSeg.textContent = String(ch.channel_number).padStart(2, "0");
     networkName.textContent = ch.network_name || "";
-    titleEl.textContent = ch.title || "";
+    setTitle(ch.title || "");
   }
 
   function flashOSD(ch) {
@@ -304,7 +463,7 @@
   function openEditor() {
     const wrap = el("chan-editor");
     wrap.innerHTML =
-      `<div class="chan-head"><span>Ch #</span><span>Name</span><span>Stream URL</span><span>Type</span><span></span></div>`;
+      `<div class="chan-head"><span>Ch #</span><span>Name</span><span>Stream / folder URL</span><span>Type</span><span></span></div>`;
     channels.forEach((c) => wrap.appendChild(rowFor(c)));
     el("modal").hidden = false;
   }
@@ -315,9 +474,9 @@
     row.innerHTML = `
       <input class="f-num" type="number" value="${c.channel_number ?? ""}" placeholder="#">
       <input class="f-name" type="text" value="${escapeAttr(c.network_name || "")}" placeholder="Name">
-      <input class="f-url" type="text" value="${escapeAttr(c.url || "")}" placeholder="https://… .m3u8 / .mp4 / youtube">
+      <input class="f-url" type="text" value="${escapeAttr(c.url || "")}" placeholder="https://… .m3u8 / .mp4 / youtube / folder/">
       <select class="f-type">
-        ${["auto", "hls", "mp4", "youtube"].map((t) =>
+        ${["auto", "hls", "mp4", "youtube", "folder"].map((t) =>
           `<option value="${t}" ${c.type === t ? "selected" : ""}>${t}</option>`).join("")}
       </select>
       <button class="del" title="Remove">✕</button>`;
@@ -367,6 +526,8 @@
     el("key-enter").addEventListener("click", () => commitEntry(true));
     document.querySelectorAll("[data-digit]").forEach((b) =>
       b.addEventListener("click", () => appendDigit(b.dataset.digit)));
+
+    video.addEventListener("ended", onMediaEnded);
 
     el("btn-mute").addEventListener("click", toggleMute);
     el("btn-full").addEventListener("click", toggleFullscreen);
@@ -419,6 +580,7 @@
   // Init
   // ===================================================================
   async function init() {
+    cacheDom();
     wireEvents();
     video.muted = true; // start muted so autoplay is permitted
     syncMuteButton();
@@ -432,5 +594,12 @@
     playChannel(start, { withStatic: false });
   }
 
-  document.addEventListener("DOMContentLoaded", init);
+  // Expose the pure parser for testing under Node.
+  if (typeof module !== "undefined" && module.exports) {
+    module.exports = { parseListing, detectType, normalize };
+  }
+
+  if (typeof document !== "undefined") {
+    document.addEventListener("DOMContentLoaded", init);
+  }
 })();
