@@ -1,5 +1,5 @@
 import pytest
-from fs42.title_parser import TitleParser
+from rabbitears.title_parser import TitleParser
 
 class TestTitleParser:
 

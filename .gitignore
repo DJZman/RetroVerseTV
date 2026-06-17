@@ -14,7 +14,7 @@ local/
 *.kate-swp
 *confs/*.json
 *confs/mine
-fs42/guide_render/static/90s.html
+rabbitears/guide_render/static/90s.html
 .idea/
 
 # C extensions

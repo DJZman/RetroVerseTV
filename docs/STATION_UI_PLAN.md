@@ -1,8 +1,8 @@
-# FieldStation42 Station Configuration UI - Implementation Plan
+# RabbitEars TV Station Configuration UI - Implementation Plan
 
 ## Overview
 
-I'm building a web-based UI for managing FieldStation42 station configurations. Currently, users must hand-edit JSON files in the `confs/` directory, which works but has limitations: no real-time validation, easy to make syntax errors, hard to visualize schedules, and you need to understand the complete schema before making changes.
+I'm building a web-based UI for managing RabbitEars TV station configurations. Currently, users must hand-edit JSON files in the `confs/` directory, which works but has limitations: no real-time validation, easy to make syntax errors, hard to visualize schedules, and you need to understand the complete schema before making changes.
 
 The new UI will provide a browser-based interface for viewing, creating, editing, and managing station configs. I'm taking an **iterative approach** - shipping useful functionality quickly, then progressively layering on convenience features. Each phase adds capability without breaking what came before.
 
@@ -54,7 +54,7 @@ If you're a power user who prefers JSON, you can stop at Phase 1 and be happy. I
 - Ajv library for JSON Schema validation
 - Integrates with existing FastAPI `/stations` API endpoints
 - Uses existing PureCSS styling and theme system
-- Vanilla JavaScript - matches rest of FieldStation42 codebase
+- Vanilla JavaScript - matches rest of RabbitEars TV codebase
 
 **User Flow:**
 1. Navigate to Station Manager dashboard
@@ -175,7 +175,7 @@ I'll likely spend time between phases gathering feedback and refining before mov
 
 **Frontend:**
 - Vanilla JavaScript (no framework, no build step)
-- PureCSS 3.0 (already used throughout FieldStation42)
+- PureCSS 3.0 (already used throughout RabbitEars TV)
 - Monaco Editor (VSCode editor component, CDN-hosted)
 - Ajv (JSON Schema validator, CDN-hosted)
 - Existing theme system (`themes/default.css`)
@@ -186,12 +186,12 @@ I'll likely spend time between phases gathering feedback and refining before mov
 - Server-side validation already implemented
 
 **Deployment:**
-- Static HTML/CSS/JS files in `fs42/fs42_server/static/`
+- Static HTML/CSS/JS files in `rabbitears/rabbitears_server/static/`
 - Served by FastAPI static file handler
 - Integrates with existing web interface
 
 **Why this stack?**
-- Matches existing FieldStation42 architecture
+- Matches existing RabbitEars TV architecture
 - No build tools = simple deployment
 - CDN dependencies = no npm/bundling needed
 - Small, focused, maintainable

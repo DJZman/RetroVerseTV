@@ -88,7 +88,7 @@ if [[ -f "$CONF_FILE" && "$FORCE" == false ]]; then
 fi
 
 # ---------------------
-# Write FieldStation42 Channel Config
+# Write RabbitEars TV Channel Config
 # ---------------------
 cat > "$CONF_FILE" << EOF
 {

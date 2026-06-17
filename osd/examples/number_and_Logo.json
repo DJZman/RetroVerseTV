@@ -14,7 +14,7 @@
         "x_margin": 0.12,
         "y_margin": 0.12,
         "display_time": 5.0,
-        "default_logo": "logos/FS42.png",
+        "default_logo": "logos/RabbitEars.png",
         "default_show_logo": false,
         "default_logo_permanent": false,
         "type": "LogoDisplay"

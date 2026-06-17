@@ -1,0 +1,15 @@
+[Unit]
+Description=RabbitEars TV Remote Controller
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=__INSTALL_DIR__
+ExecStart=__INSTALL_DIR__/env/bin/python3 rabbitears/pi/remote_controller.py
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,18 @@
+[Unit]
+Description=RabbitEars TV Field Player
+After=graphical-session.target
+Requires=graphical-session.target
+
+[Service]
+Type=simple
+WorkingDirectory=__INSTALL_DIR__
+Environment="DISPLAY=:0"
+ExecStartPre=/bin/bash -c 'if [ ! -f /tmp/rabbitears-started ]; then sleep 5; touch /tmp/rabbitears-started; fi'
+ExecStart=__INSTALL_DIR__/env/bin/python3 rabbitears_player.py
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

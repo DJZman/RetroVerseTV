@@ -1,6 +1,6 @@
-🌐 FieldStation42 Web Page Channel Streaming
+🌐 RabbitEars TV Web Page Channel Streaming
 
-This module enables live webpage streaming inside your FieldStation42 cable box simulator. It allows you to treat any live or dynamic webpage — such as weather maps, dashboards, or streaming sites — as a simulated TV channel. Pages are streamed using a headless Chromium browser and FFmpeg, encoded into HLS format.
+This module enables live webpage streaming inside your RabbitEars TV cable box simulator. It allows you to treat any live or dynamic webpage — such as weather maps, dashboards, or streaming sites — as a simulated TV channel. Pages are streamed using a headless Chromium browser and FFmpeg, encoded into HLS format.
 
 🧹 Features
 
@@ -8,7 +8,7 @@ This module enables live webpage streaming inside your FieldStation42 cable box 
 
     Streams output to http://localhost:<PORT>/hls/<channel>/index.m3u8
 
-    Integrates directly with FieldStation42’s channel switcher
+    Integrates directly with RabbitEars TV’s channel switcher
 
     Auto-generates configuration files with automatic location detection for WeatherStar
 
@@ -91,7 +91,7 @@ Use the add_web_channel.sh script to generate a new channel configuration file:
 
     <ChannelName>: Name for the channel (e.g., Weather)
 
-    <ChannelNumber>: Channel number for FieldStation42
+    <ChannelNumber>: Channel number for RabbitEars TV
 
     --force: (Optional) Overwrites existing configuration
 
@@ -127,7 +127,7 @@ This will:
 
     Delay for warm-up before stream is available
 
-📉 Step 3: Connect to FieldStation42
+📉 Step 3: Connect to RabbitEars TV
 
 After starting the stream, make sure the confs/web_*.json file is indexed:
 
@@ -180,7 +180,7 @@ mpv http://localhost:8080/hls/80s/index.m3u8
 
     You can run multiple streams in background via & or from a launch script.
 
-    Remember to update the FieldStation42 catalog and schedules when adding new channels.
+    Remember to update the RabbitEars TV catalog and schedules when adding new channels.
 
 🧪 Troubleshooting
 
@@ -198,5 +198,5 @@ Add new channel	./add_web_channel.sh "https://site.com" "Site" 39
 Start streaming	./start_web_stream.sh "Site"
 View stream	mpv http://localhost:8039/hls/site/index.m3u8
 Remove channel	rm confs/web_site.json && rm -rf hls/site && pkill -f chromium
-Rebuild catalog	Regenerate your FieldStation42 metadata
+Rebuild catalog	Regenerate your RabbitEars TV metadata
 For full integration, make sure your new web stream channel is indexed into your station catalog and schedule files. Launch with your master script to keep everything in sync.

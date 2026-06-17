@@ -1,6 +1,6 @@
 # Station Configuration API
 
-This document describes the REST API endpoints for managing FieldStation42 station configurations.
+This document describes the REST API endpoints for managing RabbitEars TV station configurations.
 
 ## Overview
 
@@ -131,7 +131,7 @@ Create a new station configuration.
 **Validation Rules:**
 - Network name must be unique across all stations
 - Channel number must be unique across all stations
-- Configuration must match the [station config schema](../fs42/station_config_schema.json)
+- Configuration must match the [station config schema](../rabbitears/station_config_schema.json)
 
 **Example:**
 ```bash
@@ -267,7 +267,7 @@ After any write (create/update) or delete operation, all station configurations 
 
 All station configurations are validated against:
 
-1. **JSON Schema** - Defined in [station_config_schema.json](../fs42/station_config_schema.json)
+1. **JSON Schema** - Defined in [station_config_schema.json](../rabbitears/station_config_schema.json)
 2. **Required Fields:**
    - `network_name` (string)
    - `channel_number` (integer)
@@ -320,7 +320,7 @@ Error responses follow this format:
 
 For complete details on all available configuration options, see:
 - [Station Configuration Reference](STATION_CONFIG_README.md)
-- [JSON Schema](../fs42/station_config_schema.json)
+- [JSON Schema](../rabbitears/station_config_schema.json)
 
 ## Examples
 
@@ -417,7 +417,7 @@ These provide full schema documentation, request/response examples, and a testin
 
 ## Notes
 
-- All operations are logged to the FieldStation42 server logs
+- All operations are logged to the RabbitEars TV server logs
 - Configuration changes are immediately reflected (auto-reload)
 - The main configuration file (`confs/main_config.json`) is not accessible via this API
 - Atomic file writes are used to prevent corruption

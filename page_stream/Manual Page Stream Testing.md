@@ -1,6 +1,6 @@
-# Manual Web Stream Testing for FieldStation42
+# Manual Web Stream Testing for RabbitEars TV
 
-This guide explains how to manually test the `page_stream` feature in FieldStation42. You will launch a webpage (like WeatherStar) and stream it as if it were a TV channel, without using `start_fs42.sh`.
+This guide explains how to manually test the `page_stream` feature in RabbitEars TV. You will launch a webpage (like WeatherStar) and stream it as if it were a TV channel, without using `start_rabbitears.sh`.
 
 ---
 
@@ -9,7 +9,7 @@ This guide explains how to manually test the `page_stream` feature in FieldStati
 Navigate to your project directory and activate the virtual environment:
 
 ```bash
-cd /mnt/fs42drive/FieldStation42
+cd /mnt/rabbitearsdrive/RabbitEars TV
 source env/bin/activate
 ```
 
@@ -108,5 +108,5 @@ pkill -f Xvfb
 
 ---
 
-You’re now ready to manually run and debug web-based channels in FieldStation42!
+You’re now ready to manually run and debug web-based channels in RabbitEars TV!
 

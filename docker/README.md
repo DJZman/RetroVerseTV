@@ -1,4 +1,4 @@
-# Running FS42 as a Docker Container
+# Running RabbitEars as a Docker Container
 
 This uses a docker-compose file with mounts for catalog, runtime, and confs so the data persists across containers.
 
@@ -9,7 +9,7 @@ This is a brand new feature and experimental. Please test, and if you find issue
 ## Instructions
 ### Required:
 Linux or WSL environment
-- If you're using Windows, you will need to both run docker in WSL, as well as run any executables inside the container (field_player.py or station_42.py) from a WSL environment.
+- If you're using Windows, you will need to both run docker in WSL, as well as run any executables inside the container (rabbitears_player.py or rabbitears_station.py) from a WSL environment.
 	- This is because WSLg is needed for forwarding the GUI components.
 
 Docker
@@ -41,14 +41,14 @@ To start the container:
 make docker-up
 ```
 
-We have wrapper commands to open field_player and station_42 in docker:
+We have wrapper commands to open rabbitears_player and rabbitears_station in docker:
 
 ```sh
-make station_42
+make rabbitears_station
 ```
 
 ```sh
-make field_player
+make rabbitears_player
 ```
 
 Those commands will bring the container up and down on the fly (which should be fine since the data is mounted and thus persistent) but if you want to keep it up, you can type `make docker-up` and it will bring the container up.
@@ -58,7 +58,7 @@ To bring the container down:
 make docker-down
 ```
 
-When there is a change to fieldstation42, you will likely need to rerun the build command to get the changes in your container.
+When there is a change to rabbitears, you will likely need to rerun the build command to get the changes in your container.
 
 The "catalog", "confs", and "runtime" folders are all mounted so that their data will persist across runs of this container.
 
@@ -77,18 +77,18 @@ If your environment differs from the defaults for either WSL or Linux, you can p
 
 #### Aliases
 
-It can be helpful to run fs42 from anywhere on your file system. For this, you can add something like this to your `.bashrc` to do so:
+It can be helpful to run rabbitears from anywhere on your file system. For this, you can add something like this to your `.bashrc` to do so:
 
 ```sh
-FS42_LOCATION="/home/user/repos/FieldStation42"
+RabbitEars_LOCATION="/home/user/repos/RabbitEars TV"
 
-station_42() {
-    make -C $FS42_LOCATION station_42 "$@"
+rabbitears_station() {
+    make -C $RabbitEars_LOCATION rabbitears_station "$@"
 }
 
-field_player() {
-    make -C $FS42_LOCATION field_player "$@"
+rabbitears_player() {
+    make -C $RabbitEars_LOCATION rabbitears_player "$@"
 }
 ```
 
-This way, you can run `station_42` or `field_player` anywhere to launch them. (the location for FS42_LOCATION would likely need to change on your machine)
+This way, you can run `rabbitears_station` or `rabbitears_player` anywhere to launch them. (the location for RabbitEars_LOCATION would likely need to change on your machine)

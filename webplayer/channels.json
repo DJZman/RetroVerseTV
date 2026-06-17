@@ -1,0 +1,39 @@
+{
+  "channels": [
+    {
+      "channel_number": 2,
+      "network_name": "Big Buck Bunny",
+      "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+      "type": "hls",
+      "title": "Open movie · HLS demo stream"
+    },
+    {
+      "channel_number": 4,
+      "network_name": "Tears of Steel",
+      "url": "https://test-streams.mux.dev/tos_ismc/main.m3u8",
+      "type": "hls",
+      "title": "Blender Foundation short film"
+    },
+    {
+      "channel_number": 5,
+      "network_name": "Sintel",
+      "url": "https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8",
+      "type": "hls",
+      "title": "Open movie · HLS demo stream"
+    },
+    {
+      "channel_number": 7,
+      "network_name": "Bunny MP4",
+      "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+      "type": "mp4",
+      "title": "Progressive MP4 demo"
+    },
+    {
+      "channel_number": 9,
+      "network_name": "Lofi",
+      "url": "https://www.youtube.com/watch?v=jfKfPfyJRdk",
+      "type": "youtube",
+      "title": "lofi hip hop radio · live"
+    }
+  ]
+}

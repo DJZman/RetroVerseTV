@@ -1,4 +1,4 @@
-# FieldStation42 Main Configuration Reference
+# RabbitEars TV Main Configuration Reference
 
 This document describes the main configuration file (`confs/main_config.json`) which contains global settings that apply across all stations.
 
@@ -10,7 +10,7 @@ This document describes the main configuration file (`confs/main_config.json`) w
 
 ## Overview
 
-The `confs/main_config.json` file is optional. If it doesn't exist, FieldStation42 uses built-in defaults. Any settings you specify will override the defaults.
+The `confs/main_config.json` file is optional. If it doesn't exist, RabbitEars TV uses built-in defaults. Any settings you specify will override the defaults.
 
 ### Example Configuration
 
@@ -40,7 +40,7 @@ The `confs/main_config.json` file is optional. If it doesn't exist, FieldStation
 | `time_format` | string | `"%H:%M"` | Format for displaying times (strftime format) |
 | `date_time_format` | string | `"%Y-%m-%dT%H:%M:%S"` | Format for date/time values (strftime format) |
 | `start_mpv` | boolean | `true` | Whether to start mpv player automatically |
-| `db_path` | string | `"runtime/fs42_fluid.db"` | Path to the SQLite database |
+| `db_path` | string | `"runtime/rabbitears_fluid.db"` | Path to the SQLite database |
 | `normalize_titles` | boolean | `false` | Enable automatic title normalization from filenames |
 | `title_patterns` | array | `[]` | Custom regex patterns for title parsing (see below) |
 
@@ -68,7 +68,7 @@ When `end_hour` is less than `start_hour`, the period wraps around midnight. For
 
 ## Custom Title Patterns
 
-When `normalize_titles` is enabled, FieldStation42 automatically parses video filenames to extract clean, display-ready titles. You can add custom regex patterns to handle special naming conventions in your media library.
+When `normalize_titles` is enabled, RabbitEars TV automatically parses video filenames to extract clean, display-ready titles. You can add custom regex patterns to handle special naming conventions in your media library.
 
 ### Why Use Custom Patterns?
 
@@ -170,7 +170,7 @@ Before adding patterns to your config:
 1. Test your regex using a tool like [regex101.com](https://regex101.com)
 2. Make sure to select the Python flavor
 3. Remember to add the JSON escaping when copying to your config
-4. Check the FieldStation42 logs on startup - they will show if patterns fail to compile
+4. Check the RabbitEars TV logs on startup - they will show if patterns fail to compile
 
 ### Example: Complete Configuration
 
@@ -202,7 +202,7 @@ Before adding patterns to your config:
 
 ## Validation and Error Handling
 
-When FieldStation42 loads `main_config.json`:
+When RabbitEars TV loads `main_config.json`:
 
 1. **Pattern validation**: Each regex pattern is compiled to check for syntax errors
 2. **Required fields**: Patterns must have both `pattern` and `group` fields
