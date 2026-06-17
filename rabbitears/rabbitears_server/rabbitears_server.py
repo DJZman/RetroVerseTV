@@ -112,10 +112,13 @@ def _resolve_media_path(url_path, media_dir, catalog_dir):
 
 @fapi.get("/api/list")
 async def api_list(request: Request, path: str):
-    """List browser-playable video files in a /media or /catalog directory.
+    """List subdirectories and browser-playable video files in a /media or
+    /catalog directory.
 
     Lets the web player use bare folder channels on this server, which (unlike
-    `python -m http.server`) does not auto-index static directories.
+    `python -m http.server`) does not auto-index static directories, and powers
+    the editor's folder browser (the `dirs` field lets the UI drill into the
+    tree and pick a folder without anyone hand-typing a path).
     """
     conf = StationManager().server_conf
     media_dir = conf.get("media_dir", "media")
@@ -133,12 +136,18 @@ async def api_list(request: Request, path: str):
     if not os.path.isdir(target):
         return JSONResponse({"error": "not a directory"}, status_code=404)
 
-    files = [
-        f"{base_url}/{name}"
-        for name in sorted(os.listdir(target))
-        if name.lower().endswith(_VIDEO_EXT) and os.path.isfile(os.path.join(target, name))
-    ]
-    return {"files": files}
+    dirs, files = [], []
+    for name in sorted(os.listdir(target)):
+        full = os.path.join(target, name)
+        if os.path.isdir(full):
+            dirs.append(f"{base_url}/{name}")
+        elif name.lower().endswith(_VIDEO_EXT) and os.path.isfile(full):
+            files.append(f"{base_url}/{name}")
+
+    # Parent for the browser's "Up" control; None at a mount root (/media, /catalog).
+    norm = base_url.rstrip("/")
+    parent = None if norm in ("/media", "/catalog") else (norm.rsplit("/", 1)[0] or None)
+    return {"path": base_url, "parent": parent, "dirs": dirs, "files": files}
 
 
 def run_with_shutdown_queue(shutdown_queue, command_queue):

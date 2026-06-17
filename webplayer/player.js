@@ -474,7 +474,8 @@
   function openEditor() {
     const wrap = el("chan-editor");
     wrap.innerHTML =
-      `<div class="chan-head"><span>Ch #</span><span>Name</span><span>Stream / folder URL</span><span>Type</span><span></span></div>`;
+      `<div class="chan-head"><span>Ch #</span><span>Name</span><span>Stream / folder URL</span>` +
+      `<span>Type</span><span title="Shuffle folder channels">⇄</span><span></span></div>`;
     channels.forEach((c) => wrap.appendChild(rowFor(c)));
     el("modal").hidden = false;
   }
@@ -485,13 +486,20 @@
     row.innerHTML = `
       <input class="f-num" type="number" value="${c.channel_number ?? ""}" placeholder="#">
       <input class="f-name" type="text" value="${escapeAttr(c.network_name || "")}" placeholder="Name">
-      <input class="f-url" type="text" value="${escapeAttr(c.url || "")}" placeholder="https://… .m3u8 / .mp4 / youtube / folder/">
+      <div class="f-url-wrap">
+        <input class="f-url" type="text" value="${escapeAttr(c.url || "")}" placeholder="https://… .m3u8 / .mp4 / youtube / folder/">
+        <button class="f-browse" type="button" title="Browse folders">📁</button>
+      </div>
       <select class="f-type">
         ${["auto", "hls", "mp4", "youtube", "folder"].map((t) =>
           `<option value="${t}" ${c.type === t ? "selected" : ""}>${t}</option>`).join("")}
       </select>
+      <label class="f-shuf" title="Shuffle (folder channels)">
+        <input class="f-order" type="checkbox" ${c.order === "shuffle" ? "checked" : ""}>
+      </label>
       <button class="del" title="Remove">✕</button>`;
     row.querySelector(".del").addEventListener("click", () => row.remove());
+    row.querySelector(".f-browse").addEventListener("click", () => openBrowser(row));
     return row;
   }
 
@@ -510,9 +518,93 @@
         network_name: r.querySelector(".f-name").value.trim(),
         url,
         type,
+        order: r.querySelector(".f-order").checked ? "shuffle" : "sequential",
       };
     });
     return normalize(list);
+  }
+
+  // ===================================================================
+  // Folder browser — drill into /catalog and /media and pick a folder so
+  // nobody has to hand-type a path (or edit channels.json) to add a loop.
+  // ===================================================================
+  let browseRow = null;   // editor row whose URL the picked folder fills
+  let browsePath = "";    // current folder; "" shows the mount roots
+
+  function openBrowser(row) {
+    browseRow = row;
+    browsePath = "";
+    el("browse-modal").hidden = false;
+    renderBrowser();
+  }
+
+  function closeBrowser() {
+    el("browse-modal").hidden = true;
+    browseRow = null;
+  }
+
+  function browseItem(label, onClick) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "browse-item";
+    b.textContent = label;
+    b.addEventListener("click", onClick);
+    return b;
+  }
+
+  async function renderBrowser() {
+    const list = el("browse-list");
+    el("browse-path").textContent = browsePath || "/";
+    el("browse-pick").disabled = !browsePath;     // can't pick the synthetic root list
+
+    if (!browsePath) {                            // mount roots
+      list.innerHTML = "";
+      ["/catalog", "/media"].forEach((root) =>
+        list.appendChild(browseItem("📁 " + root.slice(1), () => { browsePath = root; renderBrowser(); })));
+      return;
+    }
+
+    list.innerHTML = `<div class="browse-empty">Loading…</div>`;
+    let data;
+    try {
+      const resp = await fetch(`/api/list?path=${encodeURIComponent(browsePath)}`, { cache: "no-store" });
+      data = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(data.error || `Cannot list folder (${resp.status})`);
+    } catch (e) {
+      list.innerHTML = "";
+      const err = document.createElement("div");
+      err.className = "browse-error";
+      err.textContent = e.message || "Cannot list folder";
+      list.appendChild(err);
+      return;
+    }
+
+    list.innerHTML = "";
+    (data.dirs || []).forEach((d) =>
+      list.appendChild(browseItem("📁 " + d.split("/").pop(), () => { browsePath = d; renderBrowser(); })));
+    (data.files || []).forEach((f) => {
+      const div = document.createElement("div");
+      div.className = "browse-item is-file";
+      div.textContent = "🎬 " + decodeURIComponent(f.split("/").pop());
+      list.appendChild(div);
+    });
+    if (!(data.dirs || []).length && !(data.files || []).length) {
+      list.innerHTML = `<div class="browse-empty">Empty folder.</div>`;
+    }
+  }
+
+  function browseUp() {
+    if (!browsePath) return;                                  // already at roots
+    browsePath = (browsePath === "/catalog" || browsePath === "/media")
+      ? "" : browsePath.replace(/\/[^/]+$/, "");
+    renderBrowser();
+  }
+
+  function browsePickFolder() {
+    if (!browseRow || !browsePath) return;
+    browseRow.querySelector(".f-url").value = browsePath;
+    browseRow.querySelector(".f-type").value = "folder";
+    closeBrowser();
   }
 
   function saveEditor() {
@@ -561,6 +653,9 @@
     el("add-chan").addEventListener("click", () =>
       el("chan-editor").appendChild(rowFor({ channel_number: nextChannelNumber(), type: "auto" })));
     el("save-chan").addEventListener("click", saveEditor);
+    el("browse-close").addEventListener("click", closeBrowser);
+    el("browse-up").addEventListener("click", browseUp);
+    el("browse-pick").addEventListener("click", browsePickFolder);
     el("reset-chan").addEventListener("click", () => {
       if (confirm("Reset channels to the bundled defaults?")) {
         localStorage.removeItem(STORE_KEY);

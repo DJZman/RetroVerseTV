@@ -96,12 +96,30 @@
         <h2>Channels</h2>
         <button class="sc-btn" id="modal-close">✕</button>
       </header>
-      <p class="hint">Add any HLS (.m3u8), MP4/WebM, or YouTube URL. Saved in this browser.</p>
+      <p class="hint">Add any HLS (.m3u8), MP4/WebM, or YouTube URL — or set Type to
+        <em>folder</em> and use 📁 to pick a folder that plays on a loop. Tick ⇄ to shuffle.
+        Saved in this browser.</p>
       <div id="chan-editor"></div>
       <div class="editor-actions">
         <button class="btn primary" id="add-chan">+ Add channel</button>
         <button class="btn" id="reset-chan">Reset to defaults</button>
         <button class="btn primary" id="save-chan">Save &amp; Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Folder browser ===== -->
+  <div class="modal" id="browse-modal" hidden>
+    <div class="modal-box">
+      <header>
+        <h2>Pick a folder</h2>
+        <button class="sc-btn" id="browse-close">✕</button>
+      </header>
+      <div class="browse-path" id="browse-path">/</div>
+      <div class="browse-list" id="browse-list"></div>
+      <div class="editor-actions">
+        <button class="btn" id="browse-up">⬆ Up</button>
+        <button class="btn primary" id="browse-pick">Use this folder</button>
       </div>
     </div>
   </div>

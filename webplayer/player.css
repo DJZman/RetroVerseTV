@@ -315,8 +315,8 @@ html, body {
 .modal-box .hint { color: #999; font-size: 0.9em; }
 .chan-row {
   display: grid;
-  grid-template-columns: 56px 1fr 1.6fr 96px 32px;
-  gap: 8px;
+  grid-template-columns: 48px 1fr 1.5fr 80px 34px 28px;
+  gap: 6px;
   align-items: center;
   margin-bottom: 8px;
 }
@@ -328,6 +328,22 @@ html, body {
   background: #222;
   color: #fff;
 }
+/* URL cell holds the input plus a 📁 browse button */
+.f-url-wrap { display: flex; gap: 4px; }
+.f-url-wrap .f-url { min-width: 0; flex: 1 1 auto; }
+.f-browse {
+  flex: 0 0 auto;
+  width: 34px;
+  border: 1px solid #555;
+  background: #2a2a2a;
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.f-browse:hover { background: #383838; }
+/* Shuffle toggle */
+.f-shuf { display: flex; align-items: center; justify-content: center; }
+.f-shuf input { width: 18px; height: 18px; accent-color: #2a8c4b; cursor: pointer; }
 .chan-row .del {
   background: #6a2222;
   border: none;
@@ -338,12 +354,50 @@ html, body {
 }
 .chan-head {
   display: grid;
-  grid-template-columns: 56px 1fr 1.6fr 96px 32px;
-  gap: 8px;
+  grid-template-columns: 48px 1fr 1.5fr 80px 34px 28px;
+  gap: 6px;
   color: #888;
   font-size: 0.8em;
   margin-bottom: 4px;
 }
+
+/* Folder browser */
+.browse-path {
+  font-family: monospace;
+  font-size: 0.85em;
+  color: #6cc070;
+  background: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 6px 8px;
+  margin: 6px 0;
+  word-break: break-all;
+}
+.browse-list {
+  border: 1px solid #444;
+  border-radius: 6px;
+  max-height: 50vh;
+  overflow: auto;
+  background: #1a1a1a;
+}
+.browse-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 9px 12px;
+  border: 0;
+  border-bottom: 1px solid #2a2a2a;
+  background: transparent;
+  color: #eee;
+  font-size: 0.95em;
+  cursor: pointer;
+}
+.browse-item:hover { background: #262626; }
+.browse-item:last-child { border-bottom: 0; }
+.browse-item.is-file { color: #888; cursor: default; }
+.browse-item.is-file:hover { background: transparent; }
+.browse-empty { padding: 12px; color: #888; }
+.browse-error { padding: 12px; color: #d98; }
 .editor-actions {
   display: flex;
   flex-wrap: wrap;

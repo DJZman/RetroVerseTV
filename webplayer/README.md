@@ -74,7 +74,13 @@ a simple "loop channel" that auto-advances to the next clip and loops at the
 end. (This is *not* the full FieldStation42 schedule: no commercials, bumps, or
 time-of-day programming — just continuous playback of the list.)
 
-Three ways to define one:
+**From the UI:** open **☰ Channels**, click **+ Add channel**, then the **📁**
+button next to the URL field to browse your `/catalog` and `/media` trees and
+pick a folder — it fills in the path and sets the type to `folder` for you. Tick
+the **⇄** box to shuffle that channel. No need to hand-edit `channels.json`.
+(Browsing needs the RabbitEars server; the `/catalog` tree is LAN-only.)
+
+Three ways to define one in JSON:
 
 ```json
 { "channel_number": 5, "network_name": "Cartoons",
