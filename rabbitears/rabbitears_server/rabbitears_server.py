@@ -4,9 +4,9 @@ import asyncio
 import ipaddress
 import uvicorn
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, RedirectResponse, PlainTextResponse
+from fastapi.responses import FileResponse, RedirectResponse, PlainTextResponse, JSONResponse
 
 # Add paths for module imports
 cwd = os.getcwd()
@@ -81,6 +81,64 @@ async def _restrict_catalog_to_lan(request, call_next):
                 status_code=403,
             )
     return await call_next(request)
+
+
+# Browser-playable video extensions (matches the web player's VIDEO_EXT).
+_VIDEO_EXT = (".mp4", ".m4v", ".webm", ".ogv", ".ogg", ".mov", ".m3u8")
+
+
+def _resolve_media_path(url_path, media_dir, catalog_dir):
+    """Map a /media or /catalog URL path to a safe on-disk directory.
+
+    Returns (base_url, abs_dir, is_catalog). Raises ValueError if the path is
+    outside the allowed roots (path-traversal guard).
+    """
+    norm = "/" + (url_path or "").strip().strip("/")
+    if norm == "/media" or norm.startswith("/media/"):
+        base, root, is_cat, rel = "/media", media_dir, False, norm[len("/media"):]
+    elif norm == "/catalog" or norm.startswith("/catalog/"):
+        base, root, is_cat, rel = "/catalog", catalog_dir, True, norm[len("/catalog"):]
+    else:
+        raise ValueError("path must be under /media or /catalog")
+
+    rel = rel.lstrip("/")
+    root_real = os.path.realpath(root)
+    target = os.path.realpath(os.path.join(root_real, rel))
+    if target != root_real and not target.startswith(root_real + os.sep):
+        raise ValueError("path traversal")
+    base_url = base if not rel else f"{base}/{rel}"
+    return base_url, target, is_cat
+
+
+@fapi.get("/api/list")
+async def api_list(request: Request, path: str):
+    """List browser-playable video files in a /media or /catalog directory.
+
+    Lets the web player use bare folder channels on this server, which (unlike
+    `python -m http.server`) does not auto-index static directories.
+    """
+    conf = StationManager().server_conf
+    media_dir = conf.get("media_dir", "media")
+    catalog_dir = conf.get("catalog_dir", "catalog")
+    try:
+        base_url, target, is_catalog = _resolve_media_path(path, media_dir, catalog_dir)
+    except ValueError as e:
+        return JSONResponse({"error": str(e)}, status_code=400)
+
+    if is_catalog:  # same LAN-only rule as the /catalog mount
+        client = request.client.host if request.client else ""
+        if not _is_lan_client(client):
+            return JSONResponse({"error": "Catalog access is restricted to the local network."}, status_code=403)
+
+    if not os.path.isdir(target):
+        return JSONResponse({"error": "not a directory"}, status_code=404)
+
+    files = [
+        f"{base_url}/{name}"
+        for name in sorted(os.listdir(target))
+        if name.lower().endswith(_VIDEO_EXT) and os.path.isfile(os.path.join(target, name))
+    ]
+    return {"files": files}
 
 
 def run_with_shutdown_queue(shutdown_queue, command_queue):

@@ -92,10 +92,10 @@ Three ways to define one:
 ```
 
 - **`folder`** points at either a **directory** or an **`.m3u` / `.json`**
-  playlist file. For a directory, the server must return a listing — Python's
-  `python3 -m http.server` does this automatically; the RabbitEars app server's
-  `/media` and `/catalog` mounts do **not** auto-list, so use an `.m3u`/`.json`
-  file or an inline `playlist` there.
+  playlist file. Directories work two ways: hosts that auto-index (e.g.
+  `python3 -m http.server`) are read directly, and on the RabbitEars app server
+  the player falls back to its `/api/list` endpoint, so a bare `/media/...` or
+  `/catalog/...` folder works there too (no `.m3u` needed).
 - **`order`** is `sequential` (default, natural-sorted by filename) or
   `shuffle`.
 - Only browser-playable files are included (`.mp4`, `.m4v`, `.webm`, `.ogv`,

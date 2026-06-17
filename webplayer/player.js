@@ -183,17 +183,28 @@
   }
 
   async function resolveItems(ch) {
-    let items;
+    let items = [];
     if (ch.playlist && ch.playlist.length) {
       const base = new URL(location.href);
       items = ch.playlist
         .map((u) => { try { return new URL(u, base).href; } catch (_) { return null; } })
         .filter(Boolean);
     } else {
-      const resp = await fetch(ch.url, { cache: "no-store" });
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      items = parseListing(await resp.text(), resp.url || ch.url);
+      // 1) fetch the folder/playlist URL directly (works with autoindex hosts
+      //    like `python -m http.server`, and with .m3u/.json playlist files)
+      try {
+        const resp = await fetch(ch.url, { cache: "no-store" });
+        if (resp.ok) items = parseListing(await resp.text(), resp.url || ch.url);
+      } catch (_) { /* fall through to the server listing endpoint */ }
+
+      // 2) fall back to the RabbitEars server's /api/list (the app server does
+      //    not auto-index static dirs, so a bare /media|/catalog folder 404s above)
+      if (!items.length && /^\/(media|catalog)\//.test(ch.url)) {
+        const resp = await fetch(`/api/list?path=${encodeURIComponent(ch.url)}`, { cache: "no-store" });
+        if (resp.ok) items = parseListing(await resp.text(), location.href);
+      }
     }
+    if (!items.length) throw new Error("no playable items");
     if (ch.order === "shuffle") shuffleInPlace(items);
     else items.sort(naturalSort);
     return items;
